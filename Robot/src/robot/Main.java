@@ -210,7 +210,7 @@ public class Main extends SimpleApplication {
         sObject = new Node();
         Geometry base = new Geometry("Base", new Box(0.5f, 0.5f, 0.5f));
        // base.setLocalTranslation(-3.5f, -2.5f, 0.0f);
-        sObject.setLocalTranslation(-3.5f, -2.5f, 0.0f);
+        sObject.setLocalTranslation(-3.0f, -2.5f, 0.0f);
         Material matBase = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         // Use transparency - just to make sure we can always see the target
         matBase.setColor("Color", new ColorRGBA( 0.7f, 0.7f, 0.7f, 0.5f)); // silver'ish
@@ -225,6 +225,7 @@ public class Main extends SimpleApplication {
         //t1 = new Node();
         joint1Node = new Node();
         joint1 = new Geometry("Joint1",new Sphere(6, 12, 0.3f));
+        
         joint1Node.setLocalTranslation(0.0f,0.5f,0.0f);
         //joint1Node.setLocalTranslation(0.0f,0.0f,0.0f);
         Material matJoint = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -235,6 +236,7 @@ public class Main extends SimpleApplication {
         joint1.setQueueBucket(RenderQueue.Bucket.Transparent);
         joint1Node.attachChild(joint1);
         sObject.attachChild(joint1Node);
+        //rootNode.attachChild(joint1Node);
         //sObject.attachChild(t1);
        
         //the cylinder1
@@ -303,8 +305,11 @@ public class Main extends SimpleApplication {
         MouthBelow.setQueueBucket(RenderQueue.Bucket.Transparent);
         mouth2Node.attachChild(MouthBelow);
         cylinder2Node.attachChild(mouth2Node);
+        
         // Generate a sphere as a symbol for the target point
         target = new Geometry("Sphere", new Sphere(6, 12, 0.1f));
+        //target.setLocalTranslation(-1.5f, 0, 0);
+        target.setLocalTranslation(-1.0f, 0, 0);
         Material matSphere = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         matSphere.setColor("Color", ColorRGBA.Red);
         target.setMaterial(matSphere);
@@ -367,22 +372,22 @@ public class Main extends SimpleApplication {
         m.updateBound();
         
         // Tutorial section on how to use the Jama package
-        java.util.Random rand = new java.util.Random();
-        double[][] dm = new double[3][3];
-        for ( int r=0; r<3; r++) {
-            if (r!=1) { // make it singular
-                for ( int c=0; c<3; c++) {
-                    dm[r][c] = rand.nextFloat();
-                }
-            }
-        }
-        Jama.Matrix jm3 = new Jama.Matrix(dm);
-        Jama.SingularValueDecomposition svd = new Jama.SingularValueDecomposition(jm3);
-        double[] s = svd.getSingularValues();
-        for ( double e:s) {
-            System.out.print(e + " ");
-        }
-        System.out.println();
+//        java.util.Random rand = new java.util.Random();
+//        double[][] dm = new double[3][3];
+//        for ( int r=0; r<3; r++) {
+//            if (r!=1) { // make it singular
+//                for ( int c=0; c<3; c++) {
+//                    dm[r][c] = rand.nextFloat();
+//                }
+//            }
+//        }
+//        Jama.Matrix jm3 = new Jama.Matrix(dm);
+//        Jama.SingularValueDecomposition svd = new Jama.SingularValueDecomposition(jm3);
+//        double[] s = svd.getSingularValues();
+//        for ( double e:s) {
+//            System.out.print(e + " ");
+//        }
+//        System.out.println();
     }    
     
     // Update the position every sec
@@ -391,24 +396,98 @@ public class Main extends SimpleApplication {
         sita1 = 0.0;
         sita2 = 0.0;
         sita0 = 0.0;
+        //double dx, dy, dz;
         Vector3f v = target.getLocalTranslation();
         double [] detaPosArray = { v.x, v.y, v.z };
+        //System.out.print(v);
         Jama.Matrix dataPos = new Jama.Matrix(detaPosArray,3);//dx,dy,dz
+      
         
-        double [][]Mb0 = 
-        {{Math.cos(sita0),0,Math.sin(sita0),0},{0,1,0,0},{-1*Math.sin(sita0),0,Math.cos(sita0),0},{0,0,0,1} };
-        Jama.Matrix Tb0 = new Jama.Matrix(Mb0);
+//        double [][]Mb0 = 
+//        {{Math.cos(sita0),0,Math.sin(sita0),0},{0,1,0,0},{-1*Math.sin(sita0),0,Math.cos(sita0),0},{0,0,0,1} };
+//        Jama.Matrix Tb0 = new Jama.Matrix(Mb0);
+//        
+//        double [][] M01 = 
+//        { {Math.cos(sita1),-1*Math.sin(sita1),0,0},{Math.sin(sita1),Math.cos(sita1),0,0 }, {0,0,1,0},{0,0,0,1}};
+//        Jama.Matrix T10 = new Jama.Matrix(M01);
+//        
+//        double [][] M12 =
+//        { {Math.cos(sita2), -1* Math.sin(sita2),0,2}, {Math.sin(sita2), Math.cos(sita2),0,0},{0,0,1,0}, {0,0,0,1} };
+//        Jama.Matrix T20 = new Jama.Matrix(M12);
+//        
+//        double [][] M122 ={ {1,0,0,2},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
+//        Jama.Matrix T22 = new Jama.Matrix(M122);
+//        
+//        Jama.Matrix Tb2 = Tb0.times(T10).times(T20).times(T22);
+//        
+//        dx = Tb2.get(1, 4);
+//        dy = Tb2.get(2, 4);
+//        dz = Tb2.get(3, 4);
         
-        double [][] M01 = 
-        { {Math.cos(sita1),-1*Math.sin(sita1),0,0},{Math.sin(sita1),Math.cos(sita1),0,0 }, {0,0,1,0},{0,0,0,1}};
-        Jama.Matrix T10 = new Jama.Matrix(M01);
+       
+        //Jama.SingularValueDecomposition svd = new Jama.SingularValueDecomposition(jm3);
+       
         
-        double [][] M12 =
-        { {Math.cos(sita2), -1* Math.sin(sita2),0,2}, {Math.sin(sita2), Math.cos(sita2),0,0},{0,0,1,0}, {0,0,0,1} };
-        Jama.Matrix T20 = new Jama.Matrix(M12);
         
-        double [][] M122 ={ {1,0,0,2},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
-        Jama.Matrix T22 = new Jama.Matrix(M122);
+        double[][] MJ 
+                ={ {-1*(2+2*Math.cos(sita2))*(Math.sin(sita0)*Math.cos(sita1)) + ( (2*Math.sin(sita0)*Math.sin(sita1)*Math.sin(sita2) ) ),
+                -1*(2+2*Math.cos(sita2))*(Math.sin(sita1)*Math.cos(sita0)) - (2*Math.cos(sita0)*Math.cos(sita1)*Math.sin(sita2) ), 
+                (-2*Math.sin(sita2))*(Math.cos(sita1)*Math.cos(sita0)) - (2*Math.cos(sita0)*Math.sin(sita1)*Math.cos(sita2) )},
+                    { 0,
+                    (2+2*Math.cos(sita2)) * Math.cos(sita1) - 2*Math.sin(sita2)*Math.sin(sita1),
+                    (-2*Math.sin(sita2)) * Math.sin(sita1) + 2*Math.cos(sita2)*Math.cos(sita1)},
+                    { -1*(2+2*Math.cos(sita2)) * (Math.cos(sita0)*Math.cos(sita1)) + 2*Math.cos(sita0)*Math.sin(sita1)*Math.sin(sita2),
+                      (2+2*Math.cos(sita2)) * (Math.sin(sita0)*Math.sin(sita1)) + 2*Math.sin(sita0)*Math.cos(sita1)*Math.sin(sita2),
+                      (2*Math.sin(sita2)) * (Math.sin(sita0)*Math.cos(sita1)) + 2*Math.sin(sita0)*Math.sin(sita1)*Math.cos(sita2)
+                    }
+                };
+        
+        //System.out.println(MJ);
+        Jama.Matrix J = new Jama.Matrix(MJ);
+        Jama.SingularValueDecomposition svd = new Jama.SingularValueDecomposition(J);
+        Jama.Matrix S = svd.getS();
+        Jama.Matrix V = svd.getV();
+        Jama.Matrix U = svd.getU();
+        double[][]s =new double[3][3];
+        for(int i =0 ;i<3;i++){
+            for(int j = 0; j<3; j++){
+                s[i][j]=S.get(i, j);
+                if(s[i][j]!= 0){
+                    s[i][j] = 1.0 / s[i][j];
+                }
+            }
+        }
+        //System.out.println(s[1][1]);
+        S = new Jama.Matrix(s);
+        Jama.Matrix JA = V.times(S).times(U.transpose());
+           
+//        Jama.Matrix Jt = J.transpose();
+//        Jama.Matrix J1 = (J.times(Jt)).inverse();
+//        Jama.Matrix JA = Jt.times(J1);
+       Jama.Matrix sitaM = JA.times(dataPos);
+        //System.out.println(sitaM);
+        sita0 = sitaM.get(0,0);
+        sita1 = sitaM.get(1,0);
+        sita2 = sitaM.get(2,0);
+        System.out.println(sita0+","+sita1+","+sita2);
+//        Quaternion q1,q2,q3;
+//        q1 = new Quaternion( (float)Math.sin(sita0/2) ,0,(float)Math.cos(sita0/2)*1,0);
+//        q2 = new Quaternion( (float)Math.sin(sita1/2),0,0 ,(float)Math.cos(sita1/2)*1);
+//        q3 = new Quaternion( (float)Math.sin(sita2/2),0,0 ,(float)Math.cos(sita2/2)*1);
+//        joint1Node.setLocalRotation(q1);
+//        joint1Node.setLocalRotation(q2);
+//        joint2Node.setLocalRotation(q3);
+        /*joint1Node.rotate(0,(float)sita0,0);
+        joint1Node.rotate(0,0,(float)sita1);
+        joint2Node.rotate(0,0,(float)sita2);*/ // isn't the effect we want to
+        Matrix3f m1 = new Matrix3f((float)Math.cos(sita0),0,(float)Math.sin(sita0),0,1.0f,0,-1*(float)Math.sin(sita0),0,(float)Math.cos(sita0));
+        Matrix3f m2 = new Matrix3f((float)Math.cos(sita1),-1*(float)Math.sin(sita1),0, (float)Math.sin(sita1),(float)Math.cos(sita1),0, 0,0,1.0f);
+        Matrix3f m3 = new Matrix3f((float)Math.cos(sita2),-1*(float)Math.sin(sita2),0, (float)Math.sin(sita2),(float)Math.cos(sita2),0, 0,0,1.0f);
+        
+        
+        joint1.setLocalRotation(m1);
+        joint1Node.setLocalRotation(m2);
+        joint2Node.setLocalRotation(m3);
         
 }
 }
