@@ -26,8 +26,8 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.math.Matrix3f;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Eigen3f;
+import com.jme3.math.Quaternion;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.system.AppSettings;
@@ -42,7 +42,7 @@ import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Cylinder;
-
+import java.util.ArrayList;
 public class Main extends SimpleApplication {
 
     private Geometry line;
@@ -52,19 +52,22 @@ public class Main extends SimpleApplication {
     private Geometry cylinder1;
     private Geometry cylinder2;
     private Node sObject;
-    //private Node t1 ;//node may be added...     
-    //private Node t2 ;
-   
+    
     private Node joint1Node;
     private Node joint2Node;
     private Node cylinder1Node;
     private Node cylinder2Node;
     private Node mouth1Node;
     private Node mouth2Node;
-    private double sita0;
+    private Node mouthNode;
+    private double sita0 ;
     private double sita1;
     private double sita2;
+    private boolean pChange;
     
+    double [] detaPosArray={0,0,0};
+   
+//    
     int num = -1;
     
     public static void main(String[] args) {
@@ -111,83 +114,93 @@ public class Main extends SimpleApplication {
                     startP.set(endP);
                     // and redraw
                     updateLine();
+         
                     
                 }
                 if(name.equals("Joint") && !keyPressed){
                     num = (num+1)%3;
+                    System.out.println(num); 
                 }
-                
+           
             }
         };
         
         this.analogListener = new AnalogListener() {
             @Override
             public void onAnalog(String name, float value, float tpf) {
-                value *= 10.0;
-                int jnum;
+                value *= 1.5;
+               
                 // find forward/backward direction and scale it down
                 Vector3f camDir = cam.getDirection().clone().multLocal(value);
                 // find right/left direction
                 Vector3f camLeft = cam.getLeft().clone().multLocal(value);
                 // find up/down direction
                 Vector3f camUp = cam.getUp().clone().multLocal(value);
-                boolean pChange = false;
+                
                 if (name.equals("Left")) {
                     Vector3f v = target.getLocalTranslation();
-                    target.setLocalTranslation(v.add(camLeft));
-                    pChange = true;
+                   
+                         target.setLocalTranslation(v.add(camLeft));
+                        pChange = true;
+                        controlCl();
                 }
                 if (name.equals("Right")) {
                     Vector3f v = target.getLocalTranslation();
-                    target.setLocalTranslation(v.add(camLeft.negateLocal()));
-                    pChange = true;
+                     //if(( Math.sqrt( Math.pow(n.x+3.5f,2) + Math.pow(n.y+2.0f,2)+Math.pow(n.z,2)))<=4){
+                        target.setLocalTranslation(v.add(camLeft.negateLocal()));
+                        pChange = true;
+                       controlCl();
                 }
                 if (name.equals("Forward")) {
                     Vector3f v = target.getLocalTranslation();
                     target.setLocalTranslation(v.add(camDir));
                     pChange = true;
+                    controlCl();
                 }
                 if (name.equals("Back")) {
                     Vector3f v = target.getLocalTranslation();
                     target.setLocalTranslation(v.add(camDir.negateLocal()));
                     pChange = true;
+                    controlCl();
                 }
                 if (name.equals("Up")) {
                     Vector3f v = target.getLocalTranslation();
                     target.setLocalTranslation(v.add(camUp));
                     pChange = true;
+                    controlCl();
                 }
                 if (name.equals("Down")) {
                     Vector3f v = target.getLocalTranslation();
                     target.setLocalTranslation(v.add(camUp.negateLocal()));
                     pChange = true;
+                   controlCl();
                 }
                 if (pChange) updateLine();
                 
                 if(num == 0){
                     //Vector3f v = t1.getLocalTranslation();
                     if(name.equals("Add")){
-                        joint1Node.rotate(0, value*speed*1, 0);
+                        joint1Node.rotate(0, tpf*speed, 0);
                     }
                     if(name.equals("Minus")){
-                        joint1Node.rotate(0, value*speed*(-1), 0);
+                        joint1Node.rotate(0, tpf*speed*(-1), 0);
                     }
                 }
                 if(num == 1){
                     if(name.equals("Add")){
-                        joint1Node.rotate(0, 0, value*speed*1);
+                        joint1Node.rotate(0, 0, tpf*speed*1);
                     }
                     if(name.equals("Minus")){
-                        joint1Node.rotate(0, 0, value*speed*(-1));
+                        joint1Node.rotate(0, 0, tpf*speed*(-1));
                         
                     }
                 }
                 if(num == 2){
                     if(name.equals("Add")){
-                        joint2Node.rotate(0,0, value*speed*1);
+                        joint2Node.rotate(0,0, tpf*speed*1);
                     }
                     if(name.equals("Minus")){
-                        joint2Node.rotate(0,0, value*speed*(-1));
+                        joint2Node.rotate(0,0, tpf*speed*(-1));
                     }
                 }
             }
@@ -209,8 +222,8 @@ public class Main extends SimpleApplication {
         // Generate the robot - starting with a box for the base
         sObject = new Node();
         Geometry base = new Geometry("Base", new Box(0.5f, 0.5f, 0.5f));
-       // base.setLocalTranslation(-3.5f, -2.5f, 0.0f);
-        sObject.setLocalTranslation(-3.0f, -2.5f, 0.0f);
+        base.setLocalTranslation(-3.5f, -2.5f, 0.0f);
+        //sObject.setLocalTranslation(0.0f, 0.0f, 0.0f);
         Material matBase = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         // Use transparency - just to make sure we can always see the target
         matBase.setColor("Color", new ColorRGBA( 0.7f, 0.7f, 0.7f, 0.5f)); // silver'ish
@@ -226,7 +239,7 @@ public class Main extends SimpleApplication {
         joint1Node = new Node();
         joint1 = new Geometry("Joint1",new Sphere(6, 12, 0.3f));
         
-        joint1Node.setLocalTranslation(0.0f,0.5f,0.0f);
+        joint1Node.setLocalTranslation(-3.5f, -2.0f, 0.0f);
         //joint1Node.setLocalTranslation(0.0f,0.0f,0.0f);
         Material matJoint = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         matJoint.setColor("Color", new ColorRGBA( 1f, 0.68f, 0.68f, 0.5f));
@@ -235,17 +248,20 @@ public class Main extends SimpleApplication {
         joint1.setMaterial(matJoint);
         joint1.setQueueBucket(RenderQueue.Bucket.Transparent);
         joint1Node.attachChild(joint1);
-        sObject.attachChild(joint1Node);
-        //rootNode.attachChild(joint1Node);
-        //sObject.attachChild(t1);
+        //sObject.attachChild(joint1Node);
+        
+        rootNode.attachChild(joint1Node);
+        
        
         //the cylinder1
         cylinder1Node = new Node();
         Cylinder c1 = new Cylinder(12,15,0.3f,2.0f);
         cylinder1 = new Geometry("Cylinder1",c1);
         //cylinder1Node.setLocalTranslation(-3.5f,-1.0f,0.0f);
-        cylinder1Node.setLocalTranslation(0,1.0f,0);
-        cylinder1.rotate(90f*FastMath.DEG_TO_RAD, 0f, 0f);
+       cylinder1Node.setLocalTranslation(1.0f,0f,0);
+        cylinder1.rotate(90f*FastMath.DEG_TO_RAD, 0f,90.0f*FastMath.DEG_TO_RAD );
+      //  cylinder1.rotate(0f, 0f,90.0f*FastMath.DEG_TO_RAD);
+         
         Material matcylinder = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         matcylinder.setColor("Color", new ColorRGBA( 0.7f, 0.7f, 0.7f, 0.5f));
         
@@ -255,21 +271,22 @@ public class Main extends SimpleApplication {
         
         //sObject.attachChild(cylinder1);
         cylinder1Node.attachChild(cylinder1);
+        rootNode.attachChild(cylinder1Node);
+        //cylinder1Node.rotate(0f, 0f,90f*FastMath.DEG_TO_RAD);
         joint1Node.attachChild(cylinder1Node);
-        //rootNode.attachChild(cylinder1Node);
-        //joint1Node.attachChild(cylinder1);
+        
         
         //joint2
         joint2Node = new Node();
         joint2 = new Geometry("Joint2",new Sphere(6, 12, 0.3f));
-        joint2Node.setLocalTranslation(0.0f,2.0f,0.0f);
+        joint2Node.setLocalTranslation(2.0f,0f,0.0f);
         
         joint2.setMaterial(matJoint);
         joint2.setQueueBucket(RenderQueue.Bucket.Transparent);
         joint2Node.attachChild(joint2);
         joint1Node.attachChild(joint2Node);
         
-        //the cylinder1
+        //the cylinder2
         cylinder2Node = new Node();
         Cylinder c2 = new Cylinder(12,15,0.3f,2.0f);
         cylinder2 = new Geometry("Cylinder2",c2);
@@ -279,14 +296,17 @@ public class Main extends SimpleApplication {
         cylinder2.setMaterial(matcylinder);
         cylinder2.setQueueBucket(RenderQueue.Bucket.Transparent);
         cylinder2Node.attachChild(cylinder2);
+        rootNode.attachChild(cylinder2Node);
         joint2Node.attachChild(cylinder2Node);
         
         //mouth
+        mouthNode = new Node();
         mouth1Node = new Node();
         mouth2Node = new Node();
+        mouthNode.setLocalTranslation(1.15f,0.0f,0.0f);
         Box box1 = new Box(0.3f,0.1f,0.3f);
         Geometry MouthAbove = new Geometry("MouthUp",box1);
-        mouth1Node.setLocalTranslation(1.15f,0.2f,0.0f);
+        mouth1Node.setLocalTranslation(0f,0.2f,0.0f);
         MouthAbove.rotate(0f, 0f,25f*FastMath.DEG_TO_RAD);
         Material matMouth = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         matMouth.setColor("Color", new ColorRGBA( 1.0f, 0.7f, 0.7f, 0.5f));
@@ -294,28 +314,31 @@ public class Main extends SimpleApplication {
         matMouth.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
         MouthAbove.setMaterial(matMouth);
         MouthAbove.setQueueBucket(RenderQueue.Bucket.Transparent);
-        cylinder2Node.attachChild(mouth1Node);
         
+         
         Box box2 = new Box(0.3f,0.1f,0.3f);
         Geometry MouthBelow = new Geometry("MouthBelow",box2);
-        mouth2Node.setLocalTranslation(1.15f,-0.2f,0.0f);
+        mouth2Node.setLocalTranslation(0f,-0.2f,0.0f);
         MouthBelow.rotate(0f, 0f,-25f*FastMath.DEG_TO_RAD);
         
         MouthBelow.setMaterial(matMouth);
         MouthBelow.setQueueBucket(RenderQueue.Bucket.Transparent);
         mouth2Node.attachChild(MouthBelow);
-        cylinder2Node.attachChild(mouth2Node);
+        mouthNode.attachChild(mouth1Node);
+        mouthNode.attachChild(mouth2Node);
+        cylinder2Node.attachChild(mouthNode);
         
+      
         // Generate a sphere as a symbol for the target point
         target = new Geometry("Sphere", new Sphere(6, 12, 0.1f));
         //target.setLocalTranslation(-1.5f, 0, 0);
-        target.setLocalTranslation(-1.0f, 0, 0);
+        target.setLocalTranslation(0.0f, -1.0f, 0);
         Material matSphere = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         matSphere.setColor("Color", ColorRGBA.Red);
         target.setMaterial(matSphere);
 
         rootNode.attachChild(target);
-
+        
         // Set up line drawing from last position to current position of target
         // We artifically create a time step based on the number of interactions
         startP = new Vector3f(target.getLocalTranslation());
@@ -329,7 +352,7 @@ public class Main extends SimpleApplication {
         line.setMaterial(mat);
         
         rootNode.attachChild(line);
-
+       
         /** Set up interaction keys */
         setUpKeys();
 
@@ -340,8 +363,10 @@ public class Main extends SimpleApplication {
          flyCam.setDragToRotate(true);
          inputManager.addMapping("FLYCAM_RotateDrag", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
          inputManager.addListener(flyCam, "FLYCAM_RotateDrag");
-         }
-         */
+         }*/
+//        
+        
+         
     }
 
     private void setUpKeys() {
@@ -356,6 +381,7 @@ public class Main extends SimpleApplication {
         
         
         inputManager.addMapping("Add",new KeyTrigger(KeyInput.KEY_ADD));
+        inputManager.addMapping("Add",new KeyTrigger(KeyInput.KEY_EQUALS));
         inputManager.addMapping("Minus",new KeyTrigger(KeyInput.KEY_MINUS));
         
         inputManager.addListener(analogListener,
@@ -370,64 +396,29 @@ public class Main extends SimpleApplication {
         endP.set(target.getLocalTranslation());
         m.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
         m.updateBound();
-        
-        // Tutorial section on how to use the Jama package
-//        java.util.Random rand = new java.util.Random();
-//        double[][] dm = new double[3][3];
-//        for ( int r=0; r<3; r++) {
-//            if (r!=1) { // make it singular
-//                for ( int c=0; c<3; c++) {
-//                    dm[r][c] = rand.nextFloat();
-//                }
-//            }
-//        }
-//        Jama.Matrix jm3 = new Jama.Matrix(dm);
-//        Jama.SingularValueDecomposition svd = new Jama.SingularValueDecomposition(jm3);
-//        double[] s = svd.getSingularValues();
-//        for ( double e:s) {
-//            System.out.print(e + " ");
-//        }
-//        System.out.println();
+     
     }    
-    
-    // Update the position every sec
-    @Override
-    public void simpleUpdate(float tpf) {
-        sita1 = 0.0;
-        sita2 = 0.0;
-        sita0 = 0.0;
-        //double dx, dy, dz;
-        Vector3f v = target.getLocalTranslation();
-        double [] detaPosArray = { v.x, v.y, v.z };
-        //System.out.print(v);
+    public void controlCl(){
+        Vector3f v = target.getWorldTranslation();
+        Vector3f m = mouthNode.getWorldTranslation();
+        Vector3f o = joint1Node.getWorldTranslation();
+        if(o.distance(v)>4.0f){
+            System.out.println("Too far! Cannot to catch");
+            return;}
+        //System.out.println("mouth:"+m.x+","+m.y+","+m.z);
+        //System.out.println("joint2:"+new Vector3f(joint2Node.getLocalTranslation()).x+","+new Vector3f(joint2Node.getLocalTranslation()).y);
+        Quaternion q1 = new Quaternion(0,0,-1,0);
+        Quaternion q2 = new Quaternion(0,0,0,1);
+        Quaternion q3 = new Quaternion(0,0,0,1);
+        if( !(( (v.x-m.x) == detaPosArray[0])&( (v.y-m.y) ==detaPosArray[1] )&( (v.z-m.z) == detaPosArray[2])) ){
+        detaPosArray[0]=v.x-m.x;
+        detaPosArray[1]=v.y-m.y;
+        detaPosArray[2]=v.z-m.z;
+        //System.out.println("coming");
+        //System.out.println("kkkkdistance:"+detaPosArray[0]+","+detaPosArray[1]+","+detaPosArray[2]);
+        
         Jama.Matrix dataPos = new Jama.Matrix(detaPosArray,3);//dx,dy,dz
       
-        
-//        double [][]Mb0 = 
-//        {{Math.cos(sita0),0,Math.sin(sita0),0},{0,1,0,0},{-1*Math.sin(sita0),0,Math.cos(sita0),0},{0,0,0,1} };
-//        Jama.Matrix Tb0 = new Jama.Matrix(Mb0);
-//        
-//        double [][] M01 = 
-//        { {Math.cos(sita1),-1*Math.sin(sita1),0,0},{Math.sin(sita1),Math.cos(sita1),0,0 }, {0,0,1,0},{0,0,0,1}};
-//        Jama.Matrix T10 = new Jama.Matrix(M01);
-//        
-//        double [][] M12 =
-//        { {Math.cos(sita2), -1* Math.sin(sita2),0,2}, {Math.sin(sita2), Math.cos(sita2),0,0},{0,0,1,0}, {0,0,0,1} };
-//        Jama.Matrix T20 = new Jama.Matrix(M12);
-//        
-//        double [][] M122 ={ {1,0,0,2},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
-//        Jama.Matrix T22 = new Jama.Matrix(M122);
-//        
-//        Jama.Matrix Tb2 = Tb0.times(T10).times(T20).times(T22);
-//        
-//        dx = Tb2.get(1, 4);
-//        dy = Tb2.get(2, 4);
-//        dz = Tb2.get(3, 4);
-        
-       
-        //Jama.SingularValueDecomposition svd = new Jama.SingularValueDecomposition(jm3);
-       
-        
         
         double[][] MJ 
                 ={ {-1*(2+2*Math.cos(sita2))*(Math.sin(sita0)*Math.cos(sita1)) + ( (2*Math.sin(sita0)*Math.sin(sita1)*Math.sin(sita2) ) ),
@@ -461,34 +452,32 @@ public class Main extends SimpleApplication {
         S = new Jama.Matrix(s);
         Jama.Matrix JA = V.times(S).times(U.transpose());
            
-//        Jama.Matrix Jt = J.transpose();
-//        Jama.Matrix J1 = (J.times(Jt)).inverse();
-//        Jama.Matrix JA = Jt.times(J1);
-       Jama.Matrix sitaM = JA.times(dataPos);
-        //System.out.println(sitaM);
-        sita0 = sitaM.get(0,0);
-        sita1 = sitaM.get(1,0);
-        sita2 = sitaM.get(2,0);
-        System.out.println(sita0+","+sita1+","+sita2);
-//        Quaternion q1,q2,q3;
-//        q1 = new Quaternion( (float)Math.sin(sita0/2) ,0,(float)Math.cos(sita0/2)*1,0);
-//        q2 = new Quaternion( (float)Math.sin(sita1/2),0,0 ,(float)Math.cos(sita1/2)*1);
-//        q3 = new Quaternion( (float)Math.sin(sita2/2),0,0 ,(float)Math.cos(sita2/2)*1);
-//        joint1Node.setLocalRotation(q1);
-//        joint1Node.setLocalRotation(q2);
-//        joint2Node.setLocalRotation(q3);
-        /*joint1Node.rotate(0,(float)sita0,0);
-        joint1Node.rotate(0,0,(float)sita1);
-        joint2Node.rotate(0,0,(float)sita2);*/ // isn't the effect we want to
-        Matrix3f m1 = new Matrix3f((float)Math.cos(sita0),0,(float)Math.sin(sita0),0,1.0f,0,-1*(float)Math.sin(sita0),0,(float)Math.cos(sita0));
-        Matrix3f m2 = new Matrix3f((float)Math.cos(sita1),-1*(float)Math.sin(sita1),0, (float)Math.sin(sita1),(float)Math.cos(sita1),0, 0,0,1.0f);
-        Matrix3f m3 = new Matrix3f((float)Math.cos(sita2),-1*(float)Math.sin(sita2),0, (float)Math.sin(sita2),(float)Math.cos(sita2),0, 0,0,1.0f);
-        
-        
-        joint1.setLocalRotation(m1);
-        joint1Node.setLocalRotation(m2);
-        joint2Node.setLocalRotation(m3);
-        
-}
+        Jama.Matrix sitaM = JA.times(dataPos);
+        double sita0_;
+        double sita1_ ;
+        double sita2_;
+        sita0_ = sitaM.get(0,0);
+        sita1_= sitaM.get(1,0);
+        sita2_= sitaM.get(2,0);
+     
+//        now the problem is that how to rotate from the very start
+        sita0 = sita0 + sita0_;
+        sita1 = sita1 + sita1_;
+        sita2 = sita2 + sita2_;
+       
+       System.out.println(sita0+", "+sita1+","+sita2);     
+
+        q1.fromAngleAxis((float)(sita0+90.0f*FastMath.DEG_TO_RAD), new Vector3f(0,1,0));
+        q2.fromAngleAxis((float)sita1, new Vector3f(0,0,1));
+        q3.fromAngleAxis((float)sita2, new Vector3f(0,0,1));
+        joint1Node.setLocalRotation(q1);
+        joint1Node.setLocalRotation(q2);
+        joint2Node.setLocalRotation(q3);
+    }  
+  }
+      
+    @Override
+    public void simpleUpdate(float tpf){ }
+    
 }
 
