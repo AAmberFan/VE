@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<nifty xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://nifty-gui.lessvoid.com/nifty-gui" xsi:schemaLocation="https://raw.githubusercontent.com/void256/nifty-gui/1.4/nifty-core/src/main/resources/nifty.xsd https://raw.githubusercontent.com/void256/nifty-gui/1.4/nifty-core/src/main/resources/nifty.xsd">
+    <useStyles filename="nifty-default-styles.xml" />
+    <useControls filename="nifty-default-controls.xml" />
+    <screen id="start" controller="mygame.myStartScreen">
+        <layer id="background" childLayout="absolute">
+            <image id=""  filename="Interface/start.jpg" width="100%" height="100%"/>
+        </layer>
+        <layer id="foreground" childLayout="center">
+            <panel id="panel_top" childLayout="center" width="100%" align="center" height="25%">
+                <text text="THE BULB GAME" font="Interface/Fonts/BodoniMTBlack.fnt" width="100%" height="100%" />
+            </panel>
+            <panel id="panel_bottom" childLayout="vertical" width="100%" align="center" height="75%">
+                <panel id="panel_bottom_up" childLayout="center" width="100%" valign="center" height="50%">
+                    <control name="button" id="StartButton" valign="center" label="Start" align="center" backgroundColor = "#5F9EA0">
+                        <interact onClick="startGame(game)" backgroundColor = "#5F9EA0"/>
+                    </control>
+                </panel>
+                <panel id="panel_bottom_down" childLayout="center" width="100%" valign="center" height="50%">
+                    <control name="button" id="QuitButton" valign="center" label="Quit" align="center" backgroundColor = "#5F9EA0">
+                        <interact onClick="quitGame()"/>
+                    </control>
+                    
+                </panel>
+            </panel>
+        </layer>
+    </screen>
+    <screen id="game" controller="mygame.Main">
+        <layer id ="frame" childLayout="vertical">
+            <text text="" font="Interface/Fonts/BodoniMTBlack.fnt" width="100%" height="100%" />
+        </layer>
+    </screen>
+</nifty>
